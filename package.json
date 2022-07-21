@@ -1,11 +1,8 @@
 {
-  "name": "gnome-sound-device-changer-extension",
+  "name": "gnome-fast-sound-device-changer",
   "version": "1.0.0",
   "description": "Gnome output sound device changer extension",
   "main": "extension.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "Vladyslav Zolotarov",
   "license": "MIT",
   "devDependencies": {

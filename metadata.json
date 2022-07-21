@@ -1,10 +1,16 @@
 {
-    "name" : "Sound Device Changer",
+    "name" : "Fast Sound Device Changer",
     "description" : "Extension for fast swapping of sound output devices",
-    "shell-version" : [
-        "3.36"
+    "shell-version": [
+        "3.33",
+        "3.34",
+        "3.36",
+        "3.38",
+        "40",
+        "41",
+        "42"
     ],
-    "url" : "",
-    "uuid" : "example1@example.com",
+    "url" : "https://github.com/Vladislav-Zolotaryov/gnome-fast-sound-device-changer",
+    "uuid" : "gnome-fast-sound-device-changer@github.com",
     "version" : 1.0
 }
