@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <enum id="org.gnome.shell.extensions.sound.device.changer.mode">
+    <value value="0" nick="List"/>
+    <value value="1" nick="Duo"/>
+  </enum>
+  
+  <schema id="org.gnome.shell.extensions.sound.device.changer" path="/org/gnome/shell/extensions/sound/device/changer/">
+    <key name="mode"
+      enum="org.gnome.shell.extensions.sound.device.changer.mode">
+      <default>'List'</default>
+      <summary>Mode of sound device changer</summary>
+      <description>Allows to switch between list and duo-toggle modes</description>
+    </key>
+  </schema>
+</schemalist>

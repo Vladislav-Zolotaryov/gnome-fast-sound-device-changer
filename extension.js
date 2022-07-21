@@ -1,81 +1,75 @@
+'use strict';
+
 const Main = imports.ui.main;
 const St = imports.gi.St;
 const GObject = imports.gi.GObject;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const Me = imports.misc.extensionUtils.getCurrentExtension();
 
-let soundDeviceSelectorPopup;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const collectSoundDevices = Me.imports.soundDevices.collectSoundDevices;
+const executeCommand = Me.imports.utils.executeCommand;
+
+
 
 const SoundDeviceSelectorPopup = GObject.registerClass(
   class SoundDeviceSelectorPopup extends PanelMenu.Button {
 
-    _init() {
-      super._init(0);
+    _onSoundDeviceSelected(selectedItem, soundDevice) {
+      for (const item of this.items) {
+        item.setOrnament(PopupMenu.Ornament.NONE);
+      }
 
-      const buttonIcon = new St.Icon({ icon_name: 'audio-speakers', icon_size: 16 });
-      this.add_child(buttonIcon);
-
-      const command = 'pactl -f "json" list sinks';
-      const { success, failure } = executeCommand(command);
-
+      const { _, failure } = executeCommand('pactl set-default-sink ' + soundDevice.name);
       if (failure) {
-        sendMessage('Failed to retrieve sound device list', 'Failure due to: ' + failure)
-        return;
+        notifyError('Failed to switch sound device', 'Failure due to: ' + failure);
+      } else {
+        selectedItem.setOrnament(PopupMenu.Ornament.DOT);
       }
+    }
 
-      const obj = JSON.parse(success);
-      var soundDevices = [];
-      for (const [_, value] of Object.entries(obj)) {
-        soundDevices.push(value);
-      }
+    _init() {
+      const speakersIcon = new St.Icon({ icon_name: 'audio-speakers', icon_size: 16 });
+      // const headsetIcon = new St.Icon({ icon_name: 'audio-headset', icon_size: 16 });
+
+      super._init(0);
+      this.add_child(speakersIcon);
+      this.items = [];
+
+      const soundDevices = collectSoundDevices();
 
       for (const soundDevice of soundDevices) {
-        const pmItem = new PopupMenu.PopupMenuItem(soundDevice.description);
-        this.menu.addMenuItem(pmItem);
+        const popupItem = new PopupMenu.PopupMenuItem(soundDevice.description);
+        this.items.push(popupItem);
+        this.menu.addMenuItem(popupItem);
 
-        pmItem.connect('activate', () => {
-          const { _, failure } = executeCommand('pactl set-default-sink ' + soundDevice.name);
-          if (failure) {
-            sendMessage('Failed to switch sound device', 'Failure due to: ' + failure);
-          }
+        // TODO bug on first init nothing is ornated
+        popupItem.setOrnament(soundDevice.state === 'RUNNING'
+          ? PopupMenu.Ornament.DOT
+          : PopupMenu.Ornament.NONE);
+
+        popupItem.connect('activate', () => {
+          this._onSoundDeviceSelected(popupItem, soundDevice);
         });
       }
     }
   }
 );
 
-function sendMessage(title, body) {
-  Main.notify(title, body);
+function notifyError(title, body) {
+  Main.notifyError(title, body);
 }
 
-function executeCommand(command) {
-  const [_, out, err, exit_code] = GLib.spawn_command_line_sync(command);
-
-  if (!isEmpty(err)) {
-    return { failure: 'Could not access sound device list via command "' + command + '" because of error ' + err };
-  }
-
-  if (exit_code != 0) {
-    return { failure: 'Could not access sound device list via command "' + command + '" because exit code ' + exit_code };
-  }
-
-  return { success: out };
-}
-
-function isEmpty(value) {
-  return (value == null || value.length === 0);
-}
+let soundDeviceSelectorPopup;
 
 function init() { }
 
 function enable() {
   soundDeviceSelectorPopup = new SoundDeviceSelectorPopup();
-  Main.panel.addToStatusArea('soundDeviceSelectorPopup', soundDeviceSelectorPopup, 1);
+  Main.panel.addToStatusArea('soundDeviceSelector', soundDeviceSelectorPopup, 0);
 }
 
 function disable() {
-  myPopup.destroy();
+  soundDeviceSelectorPopup.destroy();
 }
