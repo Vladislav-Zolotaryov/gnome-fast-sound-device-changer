@@ -1,6 +1,6 @@
 {
-    "name" : "Example#1",
-    "description" : "Hello World",
+    "name" : "Sound Device Changer",
+    "description" : "Extension for fast swapping of sound output devices",
     "shell-version" : [
         "3.36"
     ],

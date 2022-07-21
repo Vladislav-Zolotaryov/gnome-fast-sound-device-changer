@@ -70,8 +70,6 @@ function isEmpty(value) {
 function init() { }
 
 function enable() {
-  new NotificationMessage({title: "test", bannerBodyText: "Yay"});
-
   soundDeviceSelectorPopup = new SoundDeviceSelectorPopup();
   Main.panel.addToStatusArea('soundDeviceSelectorPopup', soundDeviceSelectorPopup, 1);
 }
