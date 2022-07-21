@@ -38,7 +38,9 @@ const SoundDeviceSelectorPopup = GObject.registerClass(
 
         pmItem.connect('activate', () => {
           const { _, failure } = executeCommand('pactl set-default-sink ' + soundDevice.name);
-          sendMessage('Failed to switch sound device', 'Failure due to: ' + failure);
+          if (failure) {
+            sendMessage('Failed to switch sound device', 'Failure due to: ' + failure);
+          }
         });
       }
     }
