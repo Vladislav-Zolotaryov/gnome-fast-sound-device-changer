@@ -8,9 +8,9 @@ const PopupMenu = imports.ui.popupMenu;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const collectSoundDevices = Me.imports.soundDevices.collectSoundDevices;
+const SoundDeviceManager = Me.imports.soundDeviceManager;
 const executeCommand = Me.imports.utils.executeCommand;
-
+const Constants = Me.imports.constants;
 
 
 const SoundDeviceSelectorPopup = GObject.registerClass(
@@ -37,7 +37,7 @@ const SoundDeviceSelectorPopup = GObject.registerClass(
       this.add_child(speakersIcon);
       this.items = [];
 
-      const soundDevices = collectSoundDevices();
+      const soundDevices = SoundDeviceManager.collectSoundDevices();
 
       for (const soundDevice of soundDevices) {
         const popupItem = new PopupMenu.PopupMenuItem(soundDevice.description);
@@ -61,15 +61,19 @@ function notifyError(title, body) {
   Main.notifyError(title, body);
 }
 
-let soundDeviceSelectorPopup;
+function init() { 
+  this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.sound.device.changer');
+}
 
-function init() { }
-
-function enable() {
-  soundDeviceSelectorPopup = new SoundDeviceSelectorPopup();
-  Main.panel.addToStatusArea('soundDeviceSelector', soundDeviceSelectorPopup, 0);
+function enable() {  
+  if (settings.get_enum('mode') == Constants.modes.list) {
+    this.soundDeviceSelectorPopup = new SoundDeviceSelectorPopup();
+    Main.panel.addToStatusArea('soundDeviceSelector', this.soundDeviceSelectorPopup, 0);
+  }
 }
 
 function disable() {
-  soundDeviceSelectorPopup.destroy();
+  if (this.soundDeviceSelectorPopup) {
+    this.soundDeviceSelectorPopup.destroy();
+  }
 }

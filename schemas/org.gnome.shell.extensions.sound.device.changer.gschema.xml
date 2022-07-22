@@ -12,5 +12,15 @@
       <summary>Mode of sound device changer</summary>
       <description>Allows to switch between list and duo-toggle modes</description>
     </key>
+    <key name="device-a" type="s">
+      <default>'None'</default>
+      <summary>Duo Toggle mode first device</summary>
+      <description>Set the first device to toggle between in Duo mode</description>
+    </key>
+    <key name="device-b" type="s">
+      <default>'None'</default>
+      <summary>Duo Toggle mode second device</summary>
+      <description>Set the second device to toggle between in Duo mode</description>
+    </key>
   </schema>
 </schemalist>
