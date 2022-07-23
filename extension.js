@@ -44,7 +44,7 @@ const SoundDeviceToggle = GObject.registerClass(
       this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.sound.device.changer');
 
       const speakersIcon = new St.Icon({ icon_name: 'audio-speakers', icon_size: 16 });
-      const headsetIcon = new St.Icon({ icon_name: 'audio-headset', icon_size: 16 });
+      const headsetIcon = new St.Icon({ icon_name: 'audio-headphones', icon_size: 16 });
 
       this.currentIcon = headsetIcon;
       this.add_child(headsetIcon);
