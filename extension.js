@@ -40,7 +40,7 @@ const SoundDeviceToggle = GObject.registerClass(
     }
 
     _init() {      
-      super._init(0);
+      super._init(1);
       this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.sound.device.changer');
 
       const speakersIcon = new St.Icon({ icon_name: 'audio-speakers', icon_size: 16 });
