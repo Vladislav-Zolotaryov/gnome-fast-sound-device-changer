@@ -39,17 +39,13 @@ const SoundDeviceToggle = GObject.registerClass(
       }
     }
 
-    _init() {      
+    _init() {
       super._init(1);
       this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.sound.device.changer');
 
       const speakersIcon = new St.Icon({ icon_name: 'audio-speakers', icon_size: 16 });
       const headsetIcon = new St.Icon({ icon_name: 'audio-headphones', icon_size: 16 });
 
-      this.currentIcon = headsetIcon;
-      this.add_child(headsetIcon);
-      this.selectedDevice = null;
-      
       this.deviceA = {
         icon: speakersIcon,
         deviceName: this.settings.get_string('device-a')
@@ -58,6 +54,29 @@ const SoundDeviceToggle = GObject.registerClass(
       this.deviceB = {
         icon: headsetIcon,
         deviceName: this.settings.get_string('device-b')
+      }
+
+      const soundDevices = SoundDeviceManager.collectSoundDevices();
+      const runningDevice = soundDevices.find(soundDevice => soundDevice.state === 'RUNNING')
+
+      if (runningDevice) {
+        if (runningDevice.name == this.settings.get_string('device-a')) {
+          this.currentIcon = this.deviceA.icon;
+          this.add_child(this.deviceA.icon);
+          this.selectedDevice = this.deviceA;
+        } else if (runningDevice.name == this.settings.get_string('device-b')) {
+          this.currentIcon = this.deviceB.icon;
+          this.add_child(this.deviceB.icon);
+          this.selectedDevice = this.deviceB;
+        } else {
+          this.currentIcon = speakersIcon;
+          this.add_child(speakersIcon);
+          this.selectedDevice = null;
+        }
+      } else {
+        this.currentIcon = speakersIcon;
+        this.add_child(speakersIcon);
+        this.selectedDevice = null;
       }
 
       this.buttonEventHandle = this.connect('button-release-event', () => { this.onSoundDeviceToggle(); });
@@ -112,11 +131,11 @@ function notifyError(title, body) {
   Main.notifyError(title, body);
 }
 
-function init() { 
+function init() {
   this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.sound.device.changer');
 }
 
-function enable() {  
+function enable() {
   const settingsMode = settings.get_enum('mode');
   if (settingsMode == Constants.modes.list) {
     this.soundDeviceSelectorPopup = new SoundDeviceSelectorPopup();
