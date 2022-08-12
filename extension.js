@@ -45,6 +45,8 @@ const SoundDeviceToggle = GObject.registerClass(
 
       const speakersIcon = new St.Icon({ icon_name: 'audio-speakers', icon_size: 16 });
       const headsetIcon = new St.Icon({ icon_name: 'audio-headphones', icon_size: 16 });
+      const audioCardIcon = new St.Icon({ icon_name: 'audio-card', icon_size: 16 });
+      
 
       this.deviceA = {
         icon: speakersIcon,
@@ -69,13 +71,13 @@ const SoundDeviceToggle = GObject.registerClass(
           this.add_child(this.deviceB.icon);
           this.selectedDevice = this.deviceB;
         } else {
-          this.currentIcon = speakersIcon;
-          this.add_child(speakersIcon);
+          this.currentIcon = audioCardIcon;
+          this.add_child(audioCardIcon);
           this.selectedDevice = null;
         }
       } else {
-        this.currentIcon = speakersIcon;
-        this.add_child(speakersIcon);
+        this.currentIcon = audioCardIcon;
+        this.add_child(audioCardIcon);
         this.selectedDevice = null;
       }
 
