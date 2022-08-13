@@ -20,18 +20,16 @@ const SoundDeviceToggle = GObject.registerClass(
       let nextDevice;
       if (this.selectedDevice == null) {
         nextDevice = this.deviceA;
-      } else if (this.selectedDevice.deviceName == this.deviceA.deviceName) {
+      } else if (this.selectedDevice.uniqueName == this.deviceA.uniqueName) {
         nextDevice = this.deviceB;
-      } else if (this.selectedDevice.deviceName == this.deviceB.deviceName) {
+      } else if (this.selectedDevice.uniqueName == this.deviceB.uniqueName) {
         nextDevice = this.deviceA;
       } else {
         nextDevice = this.deviceA;
       }
 
-      const { _, failure } = executeCommand('pactl set-default-sink ' + nextDevice.deviceName);
-      if (failure) {
-        notifyError('Failed to switch sound device', 'Failure due to: ' + failure);
-      } else {
+      const { result, _ } = SoundDeviceManager.setDefaultOutputByName(nextDevice.uniqueName);
+      if (result) {
         this.selectedDevice = nextDevice;
         this.remove_child(this.currentIcon);
         this.add_child(nextDevice.icon);
@@ -43,41 +41,42 @@ const SoundDeviceToggle = GObject.registerClass(
       super._init(1);
       this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.sound.device.changer');
 
-      const speakersIcon = new St.Icon({ icon_name: 'audio-speakers', icon_size: 16 });
-      const headsetIcon = new St.Icon({ icon_name: 'audio-headphones', icon_size: 16 });
-      const audioCardIcon = new St.Icon({ icon_name: 'audio-card', icon_size: 16 });
-      
-
       this.deviceA = {
-        icon: speakersIcon,
-        deviceName: this.settings.get_string('device-a')
+        icon: new St.Icon({ icon_name: 'audio-speakers', icon_size: 16 }),
+        uniqueName: this.settings.get_string('device-a')
       }
 
       this.deviceB = {
-        icon: headsetIcon,
-        deviceName: this.settings.get_string('device-b')
+        icon: new St.Icon({ icon_name: 'audio-headphones', icon_size: 16 }),
+        uniqueName: this.settings.get_string('device-b')
       }
 
       const soundDevices = SoundDeviceManager.collectSoundDevices();
-      const runningDevice = soundDevices.find(soundDevice => soundDevice.state === 'RUNNING')
+      const defaultOutputDevice = SoundDeviceManager.getDefaultOutputName();
 
-      if (runningDevice) {
-        if (runningDevice.name == this.settings.get_string('device-a')) {
-          this.currentIcon = this.deviceA.icon;
-          this.add_child(this.deviceA.icon);
-          this.selectedDevice = this.deviceA;
-        } else if (runningDevice.name == this.settings.get_string('device-b')) {
-          this.currentIcon = this.deviceB.icon;
-          this.add_child(this.deviceB.icon);
-          this.selectedDevice = this.deviceB;
-        } else {
-          this.currentIcon = audioCardIcon;
-          this.add_child(audioCardIcon);
-          this.selectedDevice = null;
-        }
+      const runningDevice = soundDevices.find(soundDevice => soundDevice.uniqueName == defaultOutputDevice);
+
+      this.defaultDevice = {
+        icon: new St.Icon({ icon_name: runningDevice ? runningDevice.icon : 'audio-card', icon_size: 16 }),
+        uniqueName: this.settings.get_string('device-b'),
+      }
+
+      if (runningDevice != null && runningDevice.uniqueName == this.settings.get_string('device-a')) {
+        this.currentIcon = this.deviceA.icon;
+        this.add_child(this.deviceA.icon);
+        this.selectedDevice = this.deviceA;
+      } else if (runningDevice != null && runningDevice.uniqueName == this.settings.get_string('device-b')) {
+        this.currentIcon = this.deviceB.icon;
+        this.add_child(this.deviceB.icon);
+        this.selectedDevice = this.deviceB;
+      } else if (runningDevice) {
+        this.currentIcon = this.defaultDevice.icon;
+        this.add_child(this.defaultDevice.icon);
+        this.selectedDevice = null;
       } else {
-        this.currentIcon = audioCardIcon;
-        this.add_child(audioCardIcon);
+        const emptyDeviceIcon = new St.Icon({ icon_name: 'audio-card', icon_size: 16 });
+        this.currentIcon = emptyDeviceIcon;
+        this.add_child(emptyDeviceIcon);
         this.selectedDevice = null;
       }
 
@@ -94,7 +93,7 @@ const SoundDeviceSelectorPopup = GObject.registerClass(
         item.setOrnament(PopupMenu.Ornament.NONE);
       }
 
-      const { _, failure } = executeCommand('pactl set-default-sink ' + soundDevice.name);
+      const { _, failure } = executeCommand('pactl set-default-sink ' + soundDevice.uniqueName);
       if (failure) {
         notifyError('Failed to switch sound device', 'Failure due to: ' + failure);
       } else {
@@ -112,7 +111,7 @@ const SoundDeviceSelectorPopup = GObject.registerClass(
       const soundDevices = SoundDeviceManager.collectSoundDevices();
 
       for (const soundDevice of soundDevices) {
-        const popupItem = new PopupMenu.PopupMenuItem(soundDevice.description);
+        const popupItem = new PopupMenu.PopupMenuItem(soundDevice.displayName);
         this.items.push(popupItem);
         this.menu.addMenuItem(popupItem);
 

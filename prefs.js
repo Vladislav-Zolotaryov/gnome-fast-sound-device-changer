@@ -70,7 +70,7 @@ function createDeviceSelector(label, settingKey, soundDevices) {
 
     const comboBoxText = new Gtk.ComboBoxText({ 'can-focus': 0 });
     for (const device of soundDevices) {
-        comboBoxText.append(device.name, device.description);
+        comboBoxText.append(device.uniqueName, device.displayName);
     }
     comboBoxText.connect('changed', () => this.settings.set_string(settingKey, comboBoxText.get_active_id()));
     comboBoxText.set_active_id(this.settings.get_string(settingKey));
