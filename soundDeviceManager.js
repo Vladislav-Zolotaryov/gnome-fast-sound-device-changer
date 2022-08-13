@@ -3,7 +3,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 const executeCommand = Me.imports.utils.executeCommand;
 const ByteArray = imports.byteArray;
 
-class Rectangle {
+class SoundDevice {
   constructor(uniqueName, displayName, state, icon) {
     this.uniqueName = uniqueName;
     this.displayName = displayName;
@@ -25,7 +25,7 @@ function collectSoundDevices() {
   const obj = JSON.parse(ByteArray.toString(success));
   const soundDevices = [];
   for (const [_, value] of Object.entries(obj)) {
-    soundDevices.push(new Rectangle(
+    soundDevices.push(new SoundDevice(
       value.name.trim(),
       value.description.trim(),
       value.state,
