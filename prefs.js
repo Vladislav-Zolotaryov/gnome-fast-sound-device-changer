@@ -25,7 +25,11 @@ function buildPrefsWidget() {
 
     mainBox.append(listBoxFrame(createModeSelector(() => duoDevicesGroup.hide(), () => duoDevicesGroup.show())));
 
-    const soundDevices = SoundDeviceManager.collectSoundDevices();
+    const { soundDevices, failure } = SoundDeviceManager.collectSoundDevices();
+    if (failure) {
+      mainBox.append(new Gtk.Label({ label: failure, 'can-focus': 0 }));
+      return;
+    }
 
     const duoDevicesGroup = listBoxFrame(
         createDeviceSelector('Device A', 'device-a', soundDevices),

@@ -51,7 +51,11 @@ const SoundDeviceToggle = GObject.registerClass(
         uniqueName: this.settings.get_string('device-b')
       }
 
-      const soundDevices = SoundDeviceManager.collectSoundDevices();
+      const { soundDevices, failure } = SoundDeviceManager.collectSoundDevices();
+      if (failure) {
+        notifyError(failure);
+      }
+      
       const defaultOutputDevice = SoundDeviceManager.getDefaultOutputName();
 
       const runningDevice = soundDevices.find(soundDevice => soundDevice.uniqueName == defaultOutputDevice);
@@ -108,7 +112,10 @@ const SoundDeviceSelectorPopup = GObject.registerClass(
       this.add_child(speakersIcon);
       this.items = [];
 
-      const soundDevices = SoundDeviceManager.collectSoundDevices();
+      const { soundDevices, failure } = SoundDeviceManager.collectSoundDevices();
+      if (failure) {
+        notifyError(failure);
+      }
 
       for (const soundDevice of soundDevices) {
         const popupItem = new PopupMenu.PopupMenuItem(soundDevice.displayName);

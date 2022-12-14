@@ -18,8 +18,7 @@ function collectSoundDevices() {
   const { success, failure } = executeCommand(command);
 
   if (failure) {
-    notifyError('Failed to retrieve sound device list', 'Failure due to: ' + failure)
-    return [];
+    return { soundDevices: [], failure: failure };
   }
 
   const obj = JSON.parse(ByteArray.toString(success));
@@ -32,7 +31,7 @@ function collectSoundDevices() {
       value.properties['device.icon_name']
     ));
   }
-  return soundDevices;
+  return { soundDevices: soundDevices, failure: null };
 }
 
 function setDefaultOutputByName(uniqueName) {
